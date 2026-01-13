@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PRINT3D-LAB Service Maintenance</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Laser Engraver Service Maintenance App for PRINT3D-LAB technicians">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="P3D Service">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#1a1a2e">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-72x72.png">
+    
+    <!-- Splash Screens for iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --surface: #ffffff;
+            --surface-alt: #f8f9fa;
+            --text: #1a1a2e;
+            --text-light: #6c757d;
+            --border: #dee2e6;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --shadow: 0 4px 20px rgba(26, 26, 46, 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            color: var(--text);
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--primary);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            filter: invert(1);
+        }
+
+        .brand-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 2px;
+        }
+
+        .header-subtitle {
+            color: var(--accent);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* Section */
+        .section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 15px 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .section-header .toggle-icon {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .section.collapsed .section-header .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section.collapsed .section-content {
+            display: none;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 500px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            transition: all 0.3s ease;
+            background: var(--surface);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(233, 69, 96, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Status Select Styling */
+        .status-select {
+            padding: 10px 15px;
+            font-weight: 500;
+        }
+
+        .status-working { background: #d4edda; border-color: var(--success); color: #155724; }
+        .status-faulty { background: #f8d7da; border-color: var(--danger); color: #721c24; }
+        .status-needs-attention { background: #fff3cd; border-color: var(--warning); color: #856404; }
+
+        /* Photo Upload */
+        .photo-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 10px;
+            background: var(--surface-alt);
+            transition: all 0.3s ease;
+        }
+
+        .photo-upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(233, 69, 96, 0.05);
+        }
+
+        .photo-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .photo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-btn-camera {
+            background: var(--accent);
+            color: white;
+        }
+
+        .photo-btn-camera:hover {
+            background: var(--accent-light);
+        }
+
+        .photo-btn-upload {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .photo-btn-upload:hover {
+            background: var(--primary);
+        }
+
+        .photo-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .photo-preview {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-preview .delete-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Machine Card */
+        .machine-card {
+            background: var(--surface-alt);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .machine-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .machine-card-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .remove-machine-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .add-machine-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .add-machine-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        /* Subsection */
+        .subsection {
+            background: var(--surface-alt);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .subsection-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        /* Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--accent);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Bottom Actions */
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            padding: 15px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save-draft {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-save-pdf {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+        }
+
+        .btn-email {
+            background: #0078d4;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* Hidden file inputs */
+        .hidden-input {
+            display: none;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 16px;
+        }
+
+        /* Technician Info Display */
+        .technician-info {
+            background: var(--surface-alt);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .tech-info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .tech-info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .tech-info-label {
+            font-weight: 500;
+            color: var(--text-light);
+            min-width: 80px;
+        }
+
+        .tech-info-value {
+            color: var(--text);
+        }
+
+        /* Service date */
+        .service-date {
+            background: var(--accent);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 3D Printer frame -->
+                <rect x="15" y="25" width="70" height="5" stroke="white" stroke-width="2" fill="none"/>
+                <line x1="20" y1="30" x2="20" y2="75" stroke="white" stroke-width="2"/>
+                <line x1="80" y1="30" x2="80" y2="75" stroke="white" stroke-width="2"/>
+                <!-- Print head -->
+                <rect x="42" y="35" width="16" height="16" stroke="white" stroke-width="2" fill="none"/>
+                <circle cx="50" cy="43" r="5" stroke="white" stroke-width="1.5" fill="none"/>
+                <path d="M50 51 L46 60 L54 60 Z" stroke="white" stroke-width="1.5" fill="none"/>
+                <!-- Base/bed -->
+                <rect x="25" y="65" width="50" height="8" stroke="white" stroke-width="2" fill="none"/>
+                <rect x="30" y="73" width="40" height="12" stroke="white" stroke-width="2" fill="none"/>
+                <rect x="35" y="78" width="20" height="5" stroke="white" stroke-width="1.5" fill="none"/>
+                <circle cx="62" cy="80" r="3" stroke="white" stroke-width="1.5" fill="none"/>
+            </svg>
+            <span class="brand-name">PRINT3D-LAB</span>
+        </div>
+        <div class="header-subtitle">Laser Engraver Service Maintenance</div>
+    </header>
+
+    <div class="container">
+        <!-- Service Info Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Service Information
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Service Date</label>
+                        <input type="date" id="serviceDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Report Number</label>
+                        <input type="text" id="reportNumber" placeholder="Auto-generated">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Technician</label>
+                    <select id="technicianSelect" onchange="updateTechnicianInfo()">
+                        <option value="nereo">Nereo Gil</option>
+                    </select>
+                </div>
+                <div class="technician-info" id="technicianInfo">
+                    <div class="tech-info-row">
+                        <span class="tech-info-label">Phone:</span>
+                        <span class="tech-info-value" id="techPhone">0473071215</span>
+                    </div>
+                    <div class="tech-info-row">
+                        <span class="tech-info-label">Email:</span>
+                        <span class="tech-info-value" id="techEmail">nereo@print3dlab.com.au</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Information Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Client Information
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label>Client Name *</label>
+                    <input type="text" id="clientName" placeholder="Enter client name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="clientPhone" placeholder="Enter phone number">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="clientEmail" placeholder="Enter email address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="clientAddress" placeholder="Enter full address"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Machine Information Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Machine Information
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div id="machinesContainer">
+                    <!-- Machine cards will be added here -->
+                </div>
+                <button type="button" class="add-machine-btn" onclick="addMachine()">
+                    <span>+</span> Add Machine
+                </button>
+            </div>
+        </div>
+
+        <!-- Laser Tube Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Laser Tube Diagnostic
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tube Brand/Type</label>
+                        <input type="text" id="tubeBrand" placeholder="e.g., Reci, SPT, EFR">
+                    </div>
+                    <div class="form-group">
+                        <label>Power Rated (W)</label>
+                        <input type="number" id="tubePowerRated" placeholder="e.g., 100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tube Length (mm)</label>
+                        <input type="number" id="tubeLength" placeholder="e.g., 1450">
+                    </div>
+                    <div class="form-group">
+                        <label>Tube Diameter (mm)</label>
+                        <input type="number" id="tubeDiameter" placeholder="e.g., 80">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>mA Reading at PSU (Testing)</label>
+                        <input type="number" id="tubeMaReading" placeholder="e.g., 28">
+                    </div>
+                    <div class="form-group">
+                        <label>Power Output Reading (W)</label>
+                        <input type="number" id="tubePowerOutput" placeholder="e.g., 95">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tube Status</label>
+                    <select id="tubeStatus" class="status-select" onchange="updateStatusStyle(this)">
+                        <option value="">Select status...</option>
+                        <option value="working">Working - Good Condition</option>
+                        <option value="faulty">Faulty - Needs Replacement</option>
+                        <option value="needs-attention">Needs Attention</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tube Comments/Diagnosis</label>
+                    <textarea id="tubeComments" placeholder="Enter observations and recommendations..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Photos - Laser Tube</label>
+                    <div class="photo-upload-area">
+                        <div class="photo-buttons">
+                            <button type="button" class="photo-btn photo-btn-camera" onclick="takePhoto('laserTube')">
+                                📷 Take Photo
+                            </button>
+                            <button type="button" class="photo-btn photo-btn-upload" onclick="uploadPhoto('laserTube')">
+                                📁 Upload Photo
+                            </button>
+                        </div>
+                        <div class="photo-preview-container" id="laserTube-photos"></div>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" class="hidden-input" id="laserTube-camera">
+                    <input type="file" accept="image/*" multiple class="hidden-input" id="laserTube-upload">
+                </div>
+            </div>
+        </div>
+
+        <!-- Mirrors & Lens Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Mirrors & Focal Lens
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <!-- Mirror 1 -->
+                <div class="subsection">
+                    <div class="subsection-title">Mirror 1 (Rear)</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Size (mm)</label>
+                            <input type="text" id="mirror1Size" placeholder="e.g., 25mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="mirror1Type">
+                                <option value="">Select type...</option>
+                                <option value="si">Silicon (Si)</option>
+                                <option value="mo">Molybdenum (Mo)</option>
+                                <option value="cu">Copper (Cu)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <select id="mirror1Status" class="status-select" onchange="updateStatusStyle(this)">
+                            <option value="">Select condition...</option>
+                            <option value="working">Good - No Action Needed</option>
+                            <option value="needs-attention">Needs Clean & Polish</option>
+                            <option value="faulty">Needs Replacement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="mirror1Comments" placeholder="Mirror 1 observations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Mirror 2 -->
+                <div class="subsection">
+                    <div class="subsection-title">Mirror 2 (Middle/Gantry)</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Size (mm)</label>
+                            <input type="text" id="mirror2Size" placeholder="e.g., 25mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="mirror2Type">
+                                <option value="">Select type...</option>
+                                <option value="si">Silicon (Si)</option>
+                                <option value="mo">Molybdenum (Mo)</option>
+                                <option value="cu">Copper (Cu)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <select id="mirror2Status" class="status-select" onchange="updateStatusStyle(this)">
+                            <option value="">Select condition...</option>
+                            <option value="working">Good - No Action Needed</option>
+                            <option value="needs-attention">Needs Clean & Polish</option>
+                            <option value="faulty">Needs Replacement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="mirror2Comments" placeholder="Mirror 2 observations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Mirror 3 -->
+                <div class="subsection">
+                    <div class="subsection-title">Mirror 3 (Head)</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Size (mm)</label>
+                            <input type="text" id="mirror3Size" placeholder="e.g., 20mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="mirror3Type">
+                                <option value="">Select type...</option>
+                                <option value="si">Silicon (Si)</option>
+                                <option value="mo">Molybdenum (Mo)</option>
+                                <option value="cu">Copper (Cu)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <select id="mirror3Status" class="status-select" onchange="updateStatusStyle(this)">
+                            <option value="">Select condition...</option>
+                            <option value="working">Good - No Action Needed</option>
+                            <option value="needs-attention">Needs Clean & Polish</option>
+                            <option value="faulty">Needs Replacement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="mirror3Comments" placeholder="Mirror 3 observations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Focal Lens -->
+                <div class="subsection">
+                    <div class="subsection-title">Focal Lens</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Diameter (mm)</label>
+                            <input type="text" id="lensSize" placeholder="e.g., 20mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Focal Length (mm)</label>
+                            <input type="text" id="lensFocalLength" placeholder="e.g., 50.8mm">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Material</label>
+                            <select id="lensMaterial">
+                                <option value="">Select material...</option>
+                                <option value="znse">ZnSe (Zinc Selenide)</option>
+                                <option value="gaas">GaAs (Gallium Arsenide)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Condition</label>
+                            <select id="lensStatus" class="status-select" onchange="updateStatusStyle(this)">
+                                <option value="">Select condition...</option>
+                                <option value="working">Good - No Action Needed</option>
+                                <option value="needs-attention">Needs Clean & Polish</option>
+                                <option value="faulty">Needs Replacement</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="lensComments" placeholder="Lens observations..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Photos - Mirrors & Lens</label>
+                    <div class="photo-upload-area">
+                        <div class="photo-buttons">
+                            <button type="button" class="photo-btn photo-btn-camera" onclick="takePhoto('mirrors')">
+                                📷 Take Photo
+                            </button>
+                            <button type="button" class="photo-btn photo-btn-upload" onclick="uploadPhoto('mirrors')">
+                                📁 Upload Photo
+                            </button>
+                        </div>
+                        <div class="photo-preview-container" id="mirrors-photos"></div>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" class="hidden-input" id="mirrors-camera">
+                    <input type="file" accept="image/*" multiple class="hidden-input" id="mirrors-upload">
+                </div>
+            </div>
+        </div>
+
+        <!-- Gantry Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Gantry & Mechanical
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <!-- General Mechanical -->
+                <div class="subsection">
+                    <div class="subsection-title">General Mechanical State</div>
+                    <div class="form-group">
+                        <label>Overall Condition</label>
+                        <select id="gantryOverallStatus" class="status-select" onchange="updateStatusStyle(this)">
+                            <option value="">Select condition...</option>
+                            <option value="working">Good Condition</option>
+                            <option value="needs-attention">Needs Attention</option>
+                            <option value="faulty">Poor - Needs Repair</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gantryCleaningDone">
+                            <label for="gantryCleaningDone">Cleaning Done</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gantryLubricationDone">
+                            <label for="gantryLubricationDone">Lubrication Done</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gantryAlignmentChecked">
+                            <label for="gantryAlignmentChecked">Alignment Checked</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bearings -->
+                <div class="subsection">
+                    <div class="subsection-title">Bearings</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Bearing Type</label>
+                            <select id="bearingType">
+                                <option value="">Select type...</option>
+                                <option value="linear">Linear Bearings</option>
+                                <option value="wheel">Wheel Bearings</option>
+                                <option value="rail">Rail Bearings</option>
+                                <option value="mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Condition</label>
+                            <select id="bearingStatus" class="status-select" onchange="updateStatusStyle(this)">
+                                <option value="">Select condition...</option>
+                                <option value="working">Good</option>
+                                <option value="needs-attention">Needs Lubrication</option>
+                                <option value="faulty">Needs Replacement</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="bearingComments" placeholder="Bearing observations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Belts -->
+                <div class="subsection">
+                    <div class="subsection-title">Belts</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Belt Type</label>
+                            <select id="beltType">
+                                <option value="">Select type...</option>
+                                <option value="gt2">GT2</option>
+                                <option value="xl">XL</option>
+                                <option value="mxl">MXL</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Belt Width (mm)</label>
+                            <input type="text" id="beltWidth" placeholder="e.g., 10mm">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>X-Axis Belt Length</label>
+                            <input type="text" id="beltLengthX" placeholder="e.g., 2000mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Y-Axis Belt Length</label>
+                            <input type="text" id="beltLengthY" placeholder="e.g., 1500mm">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Belt Condition</label>
+                        <select id="beltStatus" class="status-select" onchange="updateStatusStyle(this)">
+                            <option value="">Select condition...</option>
+                            <option value="working">Good - Proper Tension</option>
+                            <option value="needs-attention">Needs Tensioning</option>
+                            <option value="faulty">Worn - Needs Replacement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="beltComments" placeholder="Belt observations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Motors -->
+                <div class="subsection">
+                    <div class="subsection-title">Stepper Motors</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Motor Type/Size</label>
+                            <select id="motorType">
+                                <option value="">Select type...</option>
+                                <option value="nema17">NEMA 17</option>
+                                <option value="nema23">NEMA 23</option>
+                                <option value="nema34">NEMA 34</option>
+                                <option value="servo">Servo Motor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Condition</label>
+                            <select id="motorStatus" class="status-select" onchange="updateStatusStyle(this)">
+                                <option value="">Select condition...</option>
+                                <option value="working">Good - Running Smooth</option>
+                                <option value="needs-attention">Noisy - Needs Check</option>
+                                <option value="faulty">Faulty - Needs Replacement</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="motorComments" placeholder="Motor observations..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Drag Chain -->
+                <div class="subsection">
+                    <div class="subsection-title">Drag Chain / Cable Management</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Size</label>
+                            <input type="text" id="dragChainSize" placeholder="e.g., 15x30mm">
+                        </div>
+                        <div class="form-group">
+                            <label>Condition</label>
+                            <select id="dragChainStatus" class="status-select" onchange="updateStatusStyle(this)">
+                                <option value="">Select condition...</option>
+                                <option value="working">Good</option>
+                                <option value="needs-attention">Needs Cleaning</option>
+                                <option value="faulty">Damaged - Needs Repair</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="dragChainCleaned">
+                            <label for="dragChainCleaned">Cleaned</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="cablesChecked">
+                            <label for="cablesChecked">Cables Checked</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="dragChainComments" placeholder="Drag chain observations..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Photos - Gantry & Mechanical</label>
+                    <div class="photo-upload-area">
+                        <div class="photo-buttons">
+                            <button type="button" class="photo-btn photo-btn-camera" onclick="takePhoto('gantry')">
+                                📷 Take Photo
+                            </button>
+                            <button type="button" class="photo-btn photo-btn-upload" onclick="uploadPhoto('gantry')">
+                                📁 Upload Photo
+                            </button>
+                        </div>
+                        <div class="photo-preview-container" id="gantry-photos"></div>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" class="hidden-input" id="gantry-camera">
+                    <input type="file" accept="image/*" multiple class="hidden-input" id="gantry-upload">
+                </div>
+            </div>
+        </div>
+
+        <!-- Controller Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Controller & Electronics
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Controller Type</label>
+                        <select id="controllerType">
+                            <option value="">Select type...</option>
+                            <option value="ruida">Ruida</option>
+                            <option value="trocen">Trocen (AWC)</option>
+                            <option value="leetro">Leetro</option>
+                            <option value="topwisdom">TopWisdom</option>
+                            <option value="grbl">GRBL</option>
+                            <option value="smoothie">Smoothieboard</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Controller Model</label>
+                        <input type="text" id="controllerModel" placeholder="e.g., RDC6445G">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Screen Type</label>
+                        <select id="screenType">
+                            <option value="">Select type...</option>
+                            <option value="lcd">LCD Panel</option>
+                            <option value="touch">Touch Screen</option>
+                            <option value="none">No Screen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hours on Controller</label>
+                        <input type="number" id="controllerHours" placeholder="If available">
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <div class="subsection-title">Functions Tested</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcHoming">
+                            <label for="funcHoming">Homing</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcZTable">
+                            <label for="funcZTable">Z Table</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcAutoFocus">
+                            <label for="funcAutoFocus">Auto Focus</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcFrame">
+                            <label for="funcFrame">Frame Function</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcPulse">
+                            <label for="funcPulse">Pulse/Test Fire</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcUSB">
+                            <label for="funcUSB">USB Connection</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funcEthernet">
+                            <label for="funcEthernet">Ethernet</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Settings Backup</label>
+                    <select id="settingsBackup">
+                        <option value="">Select...</option>
+                        <option value="done">Backup Completed</option>
+                        <option value="not-needed">Not Needed</option>
+                        <option value="failed">Backup Failed</option>
+                        <option value="na">N/A</option>
+                    </select>
+                </div>
+
+                <!-- Red Dot LED -->
+                <div class="subsection">
+                    <div class="subsection-title">Red Dot Pointer (if installed)</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="redDotInstalled">
+                            <label for="redDotInstalled">Red Dot Installed</label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Type/Brand</label>
+                            <input type="text" id="redDotBrand" placeholder="e.g., Generic, Custom">
+                        </div>
+                        <div class="form-group">
+                            <label>Size/Power</label>
+                            <input type="text" id="redDotSize" placeholder="e.g., 5mW">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <select id="redDotStatus" class="status-select" onchange="updateStatusStyle(this)">
+                            <option value="">Select condition...</option>
+                            <option value="working">Working - Aligned</option>
+                            <option value="needs-attention">Needs Alignment</option>
+                            <option value="faulty">Faulty - Needs Replacement</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Controller Comments</label>
+                    <textarea id="controllerComments" placeholder="Controller observations and notes..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Photos - Controller & Electronics</label>
+                    <div class="photo-upload-area">
+                        <div class="photo-buttons">
+                            <button type="button" class="photo-btn photo-btn-camera" onclick="takePhoto('controller')">
+                                📷 Take Photo
+                            </button>
+                            <button type="button" class="photo-btn photo-btn-upload" onclick="uploadPhoto('controller')">
+                                📁 Upload Photo
+                            </button>
+                        </div>
+                        <div class="photo-preview-container" id="controller-photos"></div>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" class="hidden-input" id="controller-camera">
+                    <input type="file" accept="image/*" multiple class="hidden-input" id="controller-upload">
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Notes Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                Additional Notes & Recommendations
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <div class="form-group">
+                    <label>General Observations</label>
+                    <textarea id="generalObservations" placeholder="Overall machine condition, cleanliness, workspace environment..." style="min-height: 100px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Recommendations for Client</label>
+                    <textarea id="recommendations" placeholder="Suggested repairs, replacements, upgrades, next service date..." style="min-height: 100px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Parts Needed / Quote Items</label>
+                    <textarea id="partsNeeded" placeholder="List any parts that need to be ordered..." style="min-height: 80px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Photos - Additional</label>
+                    <div class="photo-upload-area">
+                        <div class="photo-buttons">
+                            <button type="button" class="photo-btn photo-btn-camera" onclick="takePhoto('additional')">
+                                📷 Take Photo
+                            </button>
+                            <button type="button" class="photo-btn photo-btn-upload" onclick="uploadPhoto('additional')">
+                                📁 Upload Photo
+                            </button>
+                        </div>
+                        <div class="photo-preview-container" id="additional-photos"></div>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" class="hidden-input" id="additional-camera">
+                    <input type="file" accept="image/*" multiple class="hidden-input" id="additional-upload">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Action Buttons -->
+    <div class="bottom-actions">
+        <button type="button" class="action-btn btn-save-draft" onclick="saveDraft()">
+            💾 Save Draft
+        </button>
+        <button type="button" class="action-btn btn-save-pdf" onclick="generatePDF()">
+            📄 Save PDF
+        </button>
+        <button type="button" class="action-btn btn-email" onclick="sendEmail()">
+            ✉️ Email
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Saved successfully!</div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Generating PDF...</div>
+    </div>
+
+    <script>
+        // Technician Data
+        const technicians = {
+            nereo: {
+                name: 'Nereo Gil',
+                phone: '0473071215',
+                email: 'nereo@print3dlab.com.au'
+            }
+        };
+
+        // Photo storage
+        const photos = {
+            laserTube: [],
+            mirrors: [],
+            gantry: [],
+            controller: [],
+            additional: []
+        };
+
+        // Machine counter
+        let machineCount = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date
+            document.getElementById('serviceDate').valueAsDate = new Date();
+            
+            // Generate report number
+            const reportNum = 'SR-' + Date.now().toString().slice(-8);
+            document.getElementById('reportNumber').value = reportNum;
+            
+            // Add first machine
+            addMachine();
+            
+            // Load draft if exists
+            loadDraft();
+            
+            // Setup photo input listeners
+            setupPhotoListeners();
+        });
+
+        function toggleSection(header) {
+            header.parentElement.classList.toggle('collapsed');
+        }
+
+        function updateTechnicianInfo() {
+            const select = document.getElementById('technicianSelect');
+            const tech = technicians[select.value];
+            document.getElementById('techPhone').textContent = tech.phone;
+            document.getElementById('techEmail').textContent = tech.email;
+        }
+
+        function updateStatusStyle(select) {
+            select.classList.remove('status-working', 'status-faulty', 'status-needs-attention');
+            if (select.value === 'working') {
+                select.classList.add('status-working');
+            } else if (select.value === 'faulty') {
+                select.classList.add('status-faulty');
+            } else if (select.value === 'needs-attention') {
+                select.classList.add('status-needs-attention');
+            }
+        }
+
+        function addMachine() {
+            machineCount++;
+            const container = document.getElementById('machinesContainer');
+            const machineHTML = `
+                <div class="machine-card" id="machine-${machineCount}">
+                    <div class="machine-card-header">
+                        <span class="machine-card-title">Machine #${machineCount}</span>
+                        ${machineCount > 1 ? `<button type="button" class="remove-machine-btn" onclick="removeMachine(${machineCount})">Remove</button>` : ''}
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Machine Type</label>
+                            <select id="machineType-${machineCount}">
+                                <option value="">Select type...</option>
+                                <option value="co2">CO2 Laser</option>
+                                <option value="fiber">Fiber Laser</option>
+                                <option value="diode">Diode Laser</option>
+                                <option value="uv">UV Laser</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Brand/Model</label>
+                            <input type="text" id="machineModel-${machineCount}" placeholder="e.g., Thunder Laser Nova">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" id="machineYear-${machineCount}" placeholder="e.g., 2022" min="2000" max="2030">
+                        </div>
+                        <div class="form-group">
+                            <label>Serial Number</label>
+                            <input type="text" id="machineSerial-${machineCount}" placeholder="If available">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hours Run</label>
+                            <input type="number" id="machineHours-${machineCount}" placeholder="Operating hours">
+                        </div>
+                        <div class="form-group">
+                            <label>Work Area (mm)</label>
+                            <input type="text" id="machineWorkArea-${machineCount}" placeholder="e.g., 1300x900">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', machineHTML);
+        }
+
+        function removeMachine(id) {
+            const machine = document.getElementById(`machine-${id}`);
+            if (machine) {
+                machine.remove();
+            }
+        }
+
+        function setupPhotoListeners() {
+            const sections = ['laserTube', 'mirrors', 'gantry', 'controller', 'additional'];
+            
+            sections.forEach(section => {
+                const cameraInput = document.getElementById(`${section}-camera`);
+                const uploadInput = document.getElementById(`${section}-upload`);
+                
+                cameraInput.addEventListener('change', (e) => handlePhotoSelect(e, section));
+                uploadInput.addEventListener('change', (e) => handlePhotoSelect(e, section));
+            });
+        }
+
+        function takePhoto(section) {
+            document.getElementById(`${section}-camera`).click();
+        }
+
+        function uploadPhoto(section) {
+            document.getElementById(`${section}-upload`).click();
+        }
+
+        function handlePhotoSelect(event, section) {
+            const files = event.target.files;
+            
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoData = {
+                        data: e.target.result,
+                        name: file.name,
+                        section: section
+                    };
+                    photos[section].push(photoData);
+                    renderPhotos(section);
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Reset input
+            event.target.value = '';
+        }
+
+        function renderPhotos(section) {
+            const container = document.getElementById(`${section}-photos`);
+            container.innerHTML = '';
+            
+            photos[section].forEach((photo, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview';
+                preview.innerHTML = `
+                    <img src="${photo.data}" alt="Photo ${index + 1}">
+                    <button type="button" class="delete-photo" onclick="deletePhoto('${section}', ${index})">×</button>
+                `;
+                container.appendChild(preview);
+            });
+        }
+
+        function deletePhoto(section, index) {
+            photos[section].splice(index, 1);
+            renderPhotos(section);
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.toggle('error', isError);
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function collectFormData() {
+            const data = {
+                // Service Info
+                serviceDate: document.getElementById('serviceDate').value,
+                reportNumber: document.getElementById('reportNumber').value,
+                technician: technicians[document.getElementById('technicianSelect').value],
+                
+                // Client Info
+                clientName: document.getElementById('clientName').value,
+                clientPhone: document.getElementById('clientPhone').value,
+                clientEmail: document.getElementById('clientEmail').value,
+                clientAddress: document.getElementById('clientAddress').value,
+                
+                // Machines
+                machines: [],
+                
+                // Laser Tube
+                laserTube: {
+                    brand: document.getElementById('tubeBrand').value,
+                    powerRated: document.getElementById('tubePowerRated').value,
+                    length: document.getElementById('tubeLength').value,
+                    diameter: document.getElementById('tubeDiameter').value,
+                    maReading: document.getElementById('tubeMaReading').value,
+                    powerOutput: document.getElementById('tubePowerOutput').value,
+                    status: document.getElementById('tubeStatus').value,
+                    comments: document.getElementById('tubeComments').value
+                },
+                
+                // Mirrors
+                mirrors: {
+                    mirror1: {
+                        size: document.getElementById('mirror1Size').value,
+                        type: document.getElementById('mirror1Type').value,
+                        status: document.getElementById('mirror1Status').value,
+                        comments: document.getElementById('mirror1Comments').value
+                    },
+                    mirror2: {
+                        size: document.getElementById('mirror2Size').value,
+                        type: document.getElementById('mirror2Type').value,
+                        status: document.getElementById('mirror2Status').value,
+                        comments: document.getElementById('mirror2Comments').value
+                    },
+                    mirror3: {
+                        size: document.getElementById('mirror3Size').value,
+                        type: document.getElementById('mirror3Type').value,
+                        status: document.getElementById('mirror3Status').value,
+                        comments: document.getElementById('mirror3Comments').value
+                    },
+                    lens: {
+                        size: document.getElementById('lensSize').value,
+                        focalLength: document.getElementById('lensFocalLength').value,
+                        material: document.getElementById('lensMaterial').value,
+                        status: document.getElementById('lensStatus').value,
+                        comments: document.getElementById('lensComments').value
+                    }
+                },
+                
+                // Gantry
+                gantry: {
+                    overallStatus: document.getElementById('gantryOverallStatus').value,
+                    cleaningDone: document.getElementById('gantryCleaningDone').checked,
+                    lubricationDone: document.getElementById('gantryLubricationDone').checked,
+                    alignmentChecked: document.getElementById('gantryAlignmentChecked').checked,
+                    bearings: {
+                        type: document.getElementById('bearingType').value,
+                        status: document.getElementById('bearingStatus').value,
+                        comments: document.getElementById('bearingComments').value
+                    },
+                    belts: {
+                        type: document.getElementById('beltType').value,
+                        width: document.getElementById('beltWidth').value,
+                        lengthX: document.getElementById('beltLengthX').value,
+                        lengthY: document.getElementById('beltLengthY').value,
+                        status: document.getElementById('beltStatus').value,
+                        comments: document.getElementById('beltComments').value
+                    },
+                    motors: {
+                        type: document.getElementById('motorType').value,
+                        status: document.getElementById('motorStatus').value,
+                        comments: document.getElementById('motorComments').value
+                    },
+                    dragChain: {
+                        size: document.getElementById('dragChainSize').value,
+                        status: document.getElementById('dragChainStatus').value,
+                        cleaned: document.getElementById('dragChainCleaned').checked,
+                        cablesChecked: document.getElementById('cablesChecked').checked,
+                        comments: document.getElementById('dragChainComments').value
+                    }
+                },
+                
+                // Controller
+                controller: {
+                    type: document.getElementById('controllerType').value,
+                    model: document.getElementById('controllerModel').value,
+                    screenType: document.getElementById('screenType').value,
+                    hours: document.getElementById('controllerHours').value,
+                    settingsBackup: document.getElementById('settingsBackup').value,
+                    functions: {
+                        homing: document.getElementById('funcHoming').checked,
+                        zTable: document.getElementById('funcZTable').checked,
+                        autoFocus: document.getElementById('funcAutoFocus').checked,
+                        frame: document.getElementById('funcFrame').checked,
+                        pulse: document.getElementById('funcPulse').checked,
+                        usb: document.getElementById('funcUSB').checked,
+                        ethernet: document.getElementById('funcEthernet').checked
+                    },
+                    redDot: {
+                        installed: document.getElementById('redDotInstalled').checked,
+                        brand: document.getElementById('redDotBrand').value,
+                        size: document.getElementById('redDotSize').value,
+                        status: document.getElementById('redDotStatus').value
+                    },
+                    comments: document.getElementById('controllerComments').value
+                },
+                
+                // Additional
+                generalObservations: document.getElementById('generalObservations').value,
+                recommendations: document.getElementById('recommendations').value,
+                partsNeeded: document.getElementById('partsNeeded').value,
+                
+                // Photos
+                photos: photos
+            };
+            
+            // Collect machines
+            const machineCards = document.querySelectorAll('.machine-card');
+            machineCards.forEach(card => {
+                const id = card.id.split('-')[1];
+                data.machines.push({
+                    type: document.getElementById(`machineType-${id}`)?.value || '',
+                    model: document.getElementById(`machineModel-${id}`)?.value || '',
+                    year: document.getElementById(`machineYear-${id}`)?.value || '',
+                    serial: document.getElementById(`machineSerial-${id}`)?.value || '',
+                    hours: document.getElementById(`machineHours-${id}`)?.value || '',
+                    workArea: document.getElementById(`machineWorkArea-${id}`)?.value || ''
+                });
+            });
+            
+            return data;
+        }
+
+        function saveDraft() {
+            const data = collectFormData();
+            localStorage.setItem('laserServiceDraft', JSON.stringify(data));
+            showToast('Draft saved successfully!');
+        }
+
+        function loadDraft() {
+            const saved = localStorage.getItem('laserServiceDraft');
+            if (!saved) return;
+            
+            try {
+                const data = JSON.parse(saved);
+                
+                // Restore basic fields
+                if (data.serviceDate) document.getElementById('serviceDate').value = data.serviceDate;
+                if (data.reportNumber) document.getElementById('reportNumber').value = data.reportNumber;
+                if (data.clientName) document.getElementById('clientName').value = data.clientName;
+                if (data.clientPhone) document.getElementById('clientPhone').value = data.clientPhone;
+                if (data.clientEmail) document.getElementById('clientEmail').value = data.clientEmail;
+                if (data.clientAddress) document.getElementById('clientAddress').value = data.clientAddress;
+                
+                // Restore laser tube
+                if (data.laserTube) {
+                    document.getElementById('tubeBrand').value = data.laserTube.brand || '';
+                    document.getElementById('tubePowerRated').value = data.laserTube.powerRated || '';
+                    document.getElementById('tubeLength').value = data.laserTube.length || '';
+                    document.getElementById('tubeDiameter').value = data.laserTube.diameter || '';
+                    document.getElementById('tubeMaReading').value = data.laserTube.maReading || '';
+                    document.getElementById('tubePowerOutput').value = data.laserTube.powerOutput || '';
+                    document.getElementById('tubeStatus').value = data.laserTube.status || '';
+                    document.getElementById('tubeComments').value = data.laserTube.comments || '';
+                    updateStatusStyle(document.getElementById('tubeStatus'));
+                }
+                
+                // Restore photos
+                if (data.photos) {
+                    Object.keys(data.photos).forEach(section => {
+                        photos[section] = data.photos[section] || [];
+                        renderPhotos(section);
+                    });
+                }
+                
+                // Restore other sections similarly...
+                if (data.generalObservations) document.getElementById('generalObservations').value = data.generalObservations;
+                if (data.recommendations) document.getElementById('recommendations').value = data.recommendations;
+                if (data.partsNeeded) document.getElementById('partsNeeded').value = data.partsNeeded;
+                
+                showToast('Draft loaded!');
+            } catch (e) {
+                console.error('Error loading draft:', e);
+            }
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const data = collectFormData();
+            
+            // Validate required fields
+            if (!data.clientName) {
+                showToast('Please enter client name', true);
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').classList.add('show');
+            
+            try {
+                const doc = new jsPDF();
+                let y = 15;
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                const contentWidth = pageWidth - (margin * 2);
+                
+                // Helper functions
+                const checkPageBreak = (needed) => {
+                    if (y + needed > pageHeight - 20) {
+                        doc.addPage();
+                        y = 15;
+                        return true;
+                    }
+                    return false;
+                };
+                
+                const addSectionTitle = (title) => {
+                    checkPageBreak(15);
+                    doc.setFillColor(26, 26, 46);
+                    doc.rect(margin, y, contentWidth, 10, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(title, margin + 5, y + 7);
+                    doc.setTextColor(0, 0, 0);
+                    y += 15;
+                };
+                
+                const addField = (label, value) => {
+                    if (!value) return;
+                    checkPageBreak(8);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label + ':', margin, y);
+                    doc.setFont('helvetica', 'normal');
+                    const labelWidth = doc.getTextWidth(label + ': ');
+                    doc.text(String(value), margin + labelWidth, y);
+                    y += 6;
+                };
+                
+                const addStatusField = (label, value) => {
+                    if (!value) return;
+                    checkPageBreak(8);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label + ':', margin, y);
+                    
+                    const labelWidth = doc.getTextWidth(label + ': ');
+                    
+                    // Color coding for status
+                    if (value === 'working') {
+                        doc.setTextColor(40, 167, 69);
+                        doc.text('Good / Working', margin + labelWidth, y);
+                    } else if (value === 'faulty') {
+                        doc.setTextColor(220, 53, 69);
+                        doc.text('Faulty / Needs Replacement', margin + labelWidth, y);
+                    } else if (value === 'needs-attention') {
+                        doc.setTextColor(255, 193, 7);
+                        doc.text('Needs Attention', margin + labelWidth, y);
+                    } else {
+                        doc.text(String(value), margin + labelWidth, y);
+                    }
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    y += 6;
+                };
+                
+                const addMultilineText = (label, text) => {
+                    if (!text) return;
+                    checkPageBreak(15);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label + ':', margin, y);
+                    y += 5;
+                    doc.setFont('helvetica', 'normal');
+                    const lines = doc.splitTextToSize(text, contentWidth - 5);
+                    lines.forEach(line => {
+                        checkPageBreak(5);
+                        doc.text(line, margin + 5, y);
+                        y += 5;
+                    });
+                    y += 3;
+                };
+                
+                const addPhotos = async (sectionPhotos, sectionName) => {
+                    if (!sectionPhotos || sectionPhotos.length === 0) return;
+                    
+                    checkPageBreak(50);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Photos - ${sectionName}:`, margin, y);
+                    y += 8;
+                    
+                    let xPos = margin;
+                    const photoWidth = 55;
+                    const photoHeight = 45;
+                    
+                    for (let i = 0; i < sectionPhotos.length; i++) {
+                        const photo = sectionPhotos[i];
+                        
+                        if (xPos + photoWidth > pageWidth - margin) {
+                            xPos = margin;
+                            y += photoHeight + 10;
+                        }
+                        
+                        checkPageBreak(photoHeight + 15);
+                        
+                        try {
+                            doc.addImage(photo.data, 'JPEG', xPos, y, photoWidth, photoHeight);
+                            doc.setFontSize(8);
+                            doc.setFont('helvetica', 'normal');
+                            doc.text(`${sectionName} - Photo ${i + 1}`, xPos, y + photoHeight + 4);
+                        } catch (e) {
+                            console.error('Error adding photo:', e);
+                        }
+                        
+                        xPos += photoWidth + 5;
+                    }
+                    
+                    y += photoHeight + 15;
+                };
+                
+                // === HEADER ===
+                doc.setFillColor(26, 26, 46);
+                doc.rect(0, 0, pageWidth, 40, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text('PRINT3D-LAB', pageWidth / 2, 18, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('PRECISION IN EVERY LAYER', pageWidth / 2, 26, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setTextColor(233, 69, 96);
+                doc.text('Laser Engraver Service Maintenance Report', pageWidth / 2, 35, { align: 'center' });
+                
+                doc.setTextColor(0, 0, 0);
+                y = 50;
+                
+                // === SERVICE INFO ===
+                addSectionTitle('SERVICE INFORMATION');
+                addField('Report Number', data.reportNumber);
+                addField('Service Date', data.serviceDate);
+                addField('Technician', data.technician.name);
+                addField('Phone', data.technician.phone);
+                addField('Email', data.technician.email);
+                y += 5;
+                
+                // === CLIENT INFO ===
+                addSectionTitle('CLIENT INFORMATION');
+                addField('Client Name', data.clientName);
+                addField('Phone', data.clientPhone);
+                addField('Email', data.clientEmail);
+                addMultilineText('Address', data.clientAddress);
+                y += 5;
+                
+                // === MACHINES ===
+                addSectionTitle('MACHINE INFORMATION');
+                data.machines.forEach((machine, index) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Machine #${index + 1}`, margin, y);
+                    y += 6;
+                    doc.setFont('helvetica', 'normal');
+                    addField('  Type', machine.type);
+                    addField('  Brand/Model', machine.model);
+                    addField('  Year', machine.year);
+                    addField('  Serial Number', machine.serial);
+                    addField('  Hours Run', machine.hours);
+                    addField('  Work Area', machine.workArea);
+                    y += 3;
+                });
+                
+                // === LASER TUBE ===
+                addSectionTitle('LASER TUBE DIAGNOSTIC');
+                addField('Brand/Type', data.laserTube.brand);
+                addField('Power Rated', data.laserTube.powerRated ? data.laserTube.powerRated + 'W' : '');
+                addField('Tube Length', data.laserTube.length ? data.laserTube.length + 'mm' : '');
+                addField('Tube Diameter', data.laserTube.diameter ? data.laserTube.diameter + 'mm' : '');
+                addField('mA Reading (Test)', data.laserTube.maReading ? data.laserTube.maReading + 'mA' : '');
+                addField('Power Output (Test)', data.laserTube.powerOutput ? data.laserTube.powerOutput + 'W' : '');
+                addStatusField('Status', data.laserTube.status);
+                addMultilineText('Comments', data.laserTube.comments);
+                await addPhotos(photos.laserTube, 'Laser Tube');
+                
+                // === MIRRORS & LENS ===
+                addSectionTitle('MIRRORS & FOCAL LENS');
+                
+                // Mirror 1
+                doc.setFont('helvetica', 'bold');
+                doc.text('Mirror 1 (Rear)', margin, y);
+                y += 6;
+                addField('  Size', data.mirrors.mirror1.size);
+                addField('  Type', data.mirrors.mirror1.type);
+                addStatusField('  Condition', data.mirrors.mirror1.status);
+                addMultilineText('  Comments', data.mirrors.mirror1.comments);
+                
+                // Mirror 2
+                doc.setFont('helvetica', 'bold');
+                doc.text('Mirror 2 (Middle)', margin, y);
+                y += 6;
+                addField('  Size', data.mirrors.mirror2.size);
+                addField('  Type', data.mirrors.mirror2.type);
+                addStatusField('  Condition', data.mirrors.mirror2.status);
+                addMultilineText('  Comments', data.mirrors.mirror2.comments);
+                
+                // Mirror 3
+                doc.setFont('helvetica', 'bold');
+                doc.text('Mirror 3 (Head)', margin, y);
+                y += 6;
+                addField('  Size', data.mirrors.mirror3.size);
+                addField('  Type', data.mirrors.mirror3.type);
+                addStatusField('  Condition', data.mirrors.mirror3.status);
+                addMultilineText('  Comments', data.mirrors.mirror3.comments);
+                
+                // Focal Lens
+                doc.setFont('helvetica', 'bold');
+                doc.text('Focal Lens', margin, y);
+                y += 6;
+                addField('  Diameter', data.mirrors.lens.size);
+                addField('  Focal Length', data.mirrors.lens.focalLength);
+                addField('  Material', data.mirrors.lens.material);
+                addStatusField('  Condition', data.mirrors.lens.status);
+                addMultilineText('  Comments', data.mirrors.lens.comments);
+                await addPhotos(photos.mirrors, 'Mirrors & Lens');
+                
+                // === GANTRY ===
+                addSectionTitle('GANTRY & MECHANICAL');
+                addStatusField('Overall Condition', data.gantry.overallStatus);
+                addField('Cleaning Done', data.gantry.cleaningDone ? 'Yes' : 'No');
+                addField('Lubrication Done', data.gantry.lubricationDone ? 'Yes' : 'No');
+                addField('Alignment Checked', data.gantry.alignmentChecked ? 'Yes' : 'No');
+                
+                y += 3;
+                doc.setFont('helvetica', 'bold');
+                doc.text('Bearings', margin, y);
+                y += 6;
+                addField('  Type', data.gantry.bearings.type);
+                addStatusField('  Condition', data.gantry.bearings.status);
+                addMultilineText('  Comments', data.gantry.bearings.comments);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text('Belts', margin, y);
+                y += 6;
+                addField('  Type', data.gantry.belts.type);
+                addField('  Width', data.gantry.belts.width);
+                addField('  X-Axis Length', data.gantry.belts.lengthX);
+                addField('  Y-Axis Length', data.gantry.belts.lengthY);
+                addStatusField('  Condition', data.gantry.belts.status);
+                addMultilineText('  Comments', data.gantry.belts.comments);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text('Motors', margin, y);
+                y += 6;
+                addField('  Type', data.gantry.motors.type);
+                addStatusField('  Condition', data.gantry.motors.status);
+                addMultilineText('  Comments', data.gantry.motors.comments);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text('Drag Chain', margin, y);
+                y += 6;
+                addField('  Size', data.gantry.dragChain.size);
+                addStatusField('  Condition', data.gantry.dragChain.status);
+                addField('  Cleaned', data.gantry.dragChain.cleaned ? 'Yes' : 'No');
+                addField('  Cables Checked', data.gantry.dragChain.cablesChecked ? 'Yes' : 'No');
+                addMultilineText('  Comments', data.gantry.dragChain.comments);
+                await addPhotos(photos.gantry, 'Gantry');
+                
+                // === CONTROLLER ===
+                addSectionTitle('CONTROLLER & ELECTRONICS');
+                addField('Controller Type', data.controller.type);
+                addField('Model', data.controller.model);
+                addField('Screen Type', data.controller.screenType);
+                addField('Hours on Controller', data.controller.hours);
+                addField('Settings Backup', data.controller.settingsBackup);
+                
+                y += 3;
+                doc.setFont('helvetica', 'bold');
+                doc.text('Functions Tested:', margin, y);
+                y += 6;
+                const functions = [];
+                if (data.controller.functions.homing) functions.push('Homing');
+                if (data.controller.functions.zTable) functions.push('Z Table');
+                if (data.controller.functions.autoFocus) functions.push('Auto Focus');
+                if (data.controller.functions.frame) functions.push('Frame');
+                if (data.controller.functions.pulse) functions.push('Pulse/Test');
+                if (data.controller.functions.usb) functions.push('USB');
+                if (data.controller.functions.ethernet) functions.push('Ethernet');
+                doc.setFont('helvetica', 'normal');
+                doc.text('  ' + (functions.length > 0 ? functions.join(', ') : 'None tested'), margin, y);
+                y += 6;
+                
+                if (data.controller.redDot.installed) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Red Dot Pointer', margin, y);
+                    y += 6;
+                    addField('  Brand', data.controller.redDot.brand);
+                    addField('  Size/Power', data.controller.redDot.size);
+                    addStatusField('  Condition', data.controller.redDot.status);
+                }
+                
+                addMultilineText('Comments', data.controller.comments);
+                await addPhotos(photos.controller, 'Controller');
+                
+                // === ADDITIONAL NOTES ===
+                addSectionTitle('ADDITIONAL NOTES & RECOMMENDATIONS');
+                addMultilineText('General Observations', data.generalObservations);
+                addMultilineText('Recommendations', data.recommendations);
+                addMultilineText('Parts Needed', data.partsNeeded);
+                await addPhotos(photos.additional, 'Additional');
+                
+                // === FOOTER ===
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(128, 128, 128);
+                    doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                    doc.text('PRINT3D-LAB - Laser Engraver Service Report', margin, pageHeight - 10);
+                    doc.text(data.serviceDate, pageWidth - margin, pageHeight - 10, { align: 'right' });
+                }
+                
+                // Save the PDF
+                const fileName = `Service_Report_${data.clientName.replace(/\s+/g, '_')}_${data.serviceDate}.pdf`;
+                doc.save(fileName);
+                
+                // Store filename for email
+                window.lastGeneratedPDF = fileName;
+                
+                showToast('PDF generated successfully!');
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showToast('Error generating PDF: ' + error.message, true);
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('show');
+            }
+        }
+
+        function sendEmail() {
+            const data = collectFormData();
+            
+            if (!data.clientEmail) {
+                showToast('Please enter client email address', true);
+                return;
+            }
+            
+            const subject = encodeURIComponent('Laser Engraver Service Maintenance Report');
+            const body = encodeURIComponent(
+`Dear ${data.clientName},
+
+Thank you for using PRINT3D-LAB services.
+
+Please find attached the maintenance service report for your laser engraver service completed on ${data.serviceDate}.
+
+Report Number: ${data.reportNumber}
+Technician: ${data.technician.name}
+
+If you have any questions or concerns regarding this report, please do not hesitate to contact us.
+
+Best regards,
+${data.technician.name}
+PRINT3D-LAB
+Phone: ${data.technician.phone}
+Email: ${data.technician.email}
+
+---
+PRECISION IN EVERY LAYER`
+            );
+            
+            // Open email client
+            window.location.href = `mailto:${data.clientEmail}?subject=${subject}&body=${body}`;
+            
+            showToast('Opening email client...');
+        }
+
+        // ==========================================
+        // PWA SERVICE WORKER & INSTALL FUNCTIONALITY
+        // ==========================================
+        
+        let deferredPrompt;
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showToast('New version available! Refresh to update.');
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+
+        function showInstallButton() {
+            // Create install banner if it doesn't exist
+            if (!document.getElementById('installBanner')) {
+                const banner = document.createElement('div');
+                banner.id = 'installBanner';
+                banner.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        bottom: 80px;
+                        left: 15px;
+                        right: 15px;
+                        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                        color: white;
+                        padding: 15px;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                        z-index: 1000;
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    ">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Install PRINT3D-LAB App</div>
+                            <div style="font-size: 12px; opacity: 0.8;">Add to home screen for quick access</div>
+                        </div>
+                        <button onclick="installPWA()" style="
+                            background: #e94560;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">Install</button>
+                        <button onclick="dismissInstall()" style="
+                            background: transparent;
+                            color: white;
+                            border: none;
+                            padding: 5px;
+                            cursor: pointer;
+                            font-size: 20px;
+                        ">×</button>
+                    </div>
+                `;
+                document.body.appendChild(banner);
+            }
+        }
+
+        async function installPWA() {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                showToast('App installed successfully!');
+            }
+            
+            deferredPrompt = null;
+            dismissInstall();
+        }
+
+        function dismissInstall() {
+            const banner = document.getElementById('installBanner');
+            if (banner) {
+                banner.remove();
+            }
+        }
+
+        // Handle successful installation
+        window.addEventListener('appinstalled', () => {
+            showToast('PRINT3D-LAB App installed!');
+            deferredPrompt = null;
+        });
+
+        // Check if running as installed PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Running as installed PWA');
+        }
+
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            showToast('Back online!');
+        });
+
+        window.addEventListener('offline', () => {
+            showToast('You are offline. Data will be saved locally.', true);
+        });
+    </script>
+</body>
+</html>
